@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="WWebsite Icon" type="image/x-icon" href="/img/logoVNVC.jpg" />
+    <link rel="WWebsite Icon" type="image/x-icon" href="/website vacxin/img/logoVNVC.jpg" />
     <title>Vacxin VNVC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
@@ -20,20 +20,41 @@
 </head>
 
 <body>
+    <script>
+        // Function to load content into the iframe and update the URL
+        function loadContent(url, title) {
+            // Update the iframe content
+            document.getElementById('content-frame').src = url;
+            // Update the browser's address bar
+            history.pushState({ url: url }, title, url);
+            // Update the page title (optional)
+            document.title = title + ' - Vacxin VNVC';
+        }
+
+        // Handle back/forward navigation
+        window.onpopstate = function(event) {
+            if (event.state && event.state.url) {
+                document.getElementById('content-frame').src = event.state.url;
+            }
+        };
+
+        // Initial state (optional, to ensure the URL matches the initial iframe content)
+        history.replaceState({ url: '/website vacxin/menu/noidung.html' }, 'Trang chủ VNVC', '/website vacxin/menu/noidung.html');
+    </script>
     <div class="app">
         <div>
             <header class="header">
                 <nav class="container2">
                     <a href="/website vacxin/index.html" id="logo">
                     <img src="/website vacxin/img/logo.webp" alt="logo">
-                </a>
+                    </a>
                 <ul id="main-menu">
-                    <li><a href="/website vacxin/menu/gioithieu.html" target="content-frame">Giờ làm việc: từ thứ 2 đến chủ nhật</a></li>
-                    <li><a href="/website vacxin/menu/noidung.html" target="content-frame">Trang chủ VNVC</a></li>
-                    <li><a href="/website vacxin/menu/danhmucvacxin.html" target="content-frame">Danh Mục Vacxin</a></li>
-                    <li><a href="/website vacxin/menu/tintuc.html" target="content-frame">Tin Tức</a></li>
-                    <li><a href="/website vacxin/menu/FAQ.html" target="content-frame">FAQ</a></li>
-                    <li><a href="/website vacxin/menu/hotline.html" target="content-frame">HOTLINE: 02871026595</a></li>
+                    <li><a href="#" onclick="loadContent('/website vacxin/menu/gioithieu.html', 'Giới thiệu'); return false;">Giờ làm việc: từ thứ 2 đến chủ nhật</a></li>
+                    <li><a href="#" onclick="loadContent('/website vacxin/menu/noidung.html', 'Trang chủ VNVC'); return false;">Trang chủ VNVC</a></li>
+                    <li><a href="#" onclick="loadContent('/website vacxin/menu/danhmucvacxin.html', 'Danh Mục Vacxin'); return false;">Danh Mục Vacxin</a></li>
+                    <li><a href="#" onclick="loadContent('/website vacxin/menu/tintuc.html', 'Tin Tức'); return false;">Tin Tức</a></li>
+                    <li><a href="#" onclick="loadContent('/website vacxin/menu/FAQ.html', 'FAQ'); return false;">FAQ</a></li>
+                    <li><a href="#" onclick="loadContent('/website vacxin/menu/hotline.html', 'HOTLINE: 02871026595'); return false;">HOTLINE: 02871026595</a></li>
                     <li><a href="/website vacxin/menu/dangnhapdangki.html">Đăng nhập/Đăng kí</a></li>
                 </ul>
                 </nav>
@@ -68,7 +89,7 @@
             </div>
             <div class="colum">
 
-                    <iframe name="content-frame" src="/website vacxin/menu/noidung.html" width="100%" height="auto" style="border: none;"></iframe>
+                    <iframe name="content-frame" id="content-frame"  src="/website vacxin/menu/noidung.html" width="100%" height="auto" style="border: none;"></iframe>
 
                     <!-- <div id ="vxchoose" class="vacxin-choose">
                         <div class="vacxin-choose-header">
