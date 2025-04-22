@@ -1,0 +1,197 @@
+<?php
+session_start();
+$base_url = '/websitevacxin/';
+
+// Kiểm tra cookie ghi nhớ đăng nhập
+if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_token'])) {
+    require_once 'db_connect.php';
+    
+    $token = $_COOKIE['remember_token'];
+    $current_time = date('Y-m-d H:i:s');
+    
+    // Kiểm tra token trong database
+    $sql = "SELECT u.id, u.username, u.full_name 
+            FROM remember_tokens r 
+            JOIN users u ON r.user_id = u.id 
+            WHERE r.token = '$token' AND r.expires > '$current_time'";
+    
+    $result = $conn->query($sql);
+    
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        
+        // Đăng nhập tự động
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['full_name'] = $user['full_name'];
+    }
+}
+
+// Define the base URL for assets
+$base_url = '/websitevacxin/';
+?>
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="<?php echo $base_url; ?>img/logoVNVC.jpg" />
+    <title>Trang chủ - Vacxin VNVC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500&family=Roboto:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo $base_url; ?>css/themify-icons.css">
+    <link rel="stylesheet" href="<?php echo $base_url; ?>css/main.css">
+    <link rel="stylesheet" href="<?php echo $base_url; ?>css/base.css">
+    <link rel="stylesheet" href="<?php echo $base_url; ?>css/home.css">
+    <style>
+        .hero-section {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('<?php echo $base_url; ?>img/hero-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            padding: 20px;
+        }
+        
+        .hero-content h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero-content p {
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero-btn {
+            display: inline-block;
+            background-color: #2a388f;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .hero-btn:hover {
+            background-color: #1a2570;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div>
+            <header class="header">
+                <nav class="container2">
+                    <a href="<?php echo $base_url; ?>index.php" id="logo">
+                        <img src="<?php echo $base_url; ?>img/logo.webp" alt="logo">
+                    </a>
+                    <ul id="main-menu">
+                        <li><a href="<?php echo $base_url; ?>index.php"><i class="fas fa-home"></i> Trang chủ</a></li>
+                        <li><a href="<?php echo $base_url; ?>menu/danhmucvacxin.php"><i class="fas fa-syringe"></i> Danh Mục Vắc Xin</a></li>
+                        <li><a href="<?php echo $base_url; ?>menu/tintuc.php"><i class="fas fa-newspaper"></i> Tin Tức</a></li>
+                        <li><a href="#"><i class="fas fa-question-circle"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-phone"></i> HOTLINE: 02871026595</a></li>
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                        <li class="user-menu">
+                            <a href="#"><i class="fas fa-user-circle"></i> <?php echo htmlspecialchars($_SESSION['full_name']); ?></a>
+                            <ul class="sub-menu">
+                                <li><a href="<?php echo $base_url; ?>menu/profile.php"><i class="fas fa-id-card"></i> Thông tin cá nhân</a></li>
+                                <li><a href="<?php echo $base_url; ?>menu/giohang.php"><i class="fas fa-shopping-cart"></i> Giỏ hàng vắc xin</a></li>
+                                <li><a href="<?php echo $base_url; ?>menu/logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
+                            </ul>
+                        </li>
+                        <?php else: ?>
+                        <li><a href="<?php echo $base_url; ?>menu/login.php"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a></li>
+                        <li><a href="<?php echo $base_url; ?>menu/register.php"><i class="fas fa-user-plus"></i> Đăng ký</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
+            </header>
+        </div>
+        
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1>Chào mừng đến với VNVC</h1>
+                <p>Hệ thống tiêm chủng vắc xin hàng đầu Việt Nam</p>
+                <a href="<?php echo $base_url; ?>menu/danhmucvacxin.php" class="hero-btn">Xem danh mục vắc xin</a>
+            </div>
+        </div>
+        
+        <div id="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Về VNVC</h3>
+                    <p>Hệ thống tiêm chủng vắc xin hàng đầu Việt Nam, cung cấp dịch vụ tiêm chủng chất lượng cao.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên hệ</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> Địa chỉ: 123 Đường ABC, Quận XYZ, TP. HCM</p>
+                    <p><i class="fas fa-phone"></i> Hotline: 02871026595</p>
+                    <p><i class="fas fa-envelope"></i> Email: info@vnvc.vn</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Theo dõi chúng tôi</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© Các thông tin trên website vnvc.vn chỉ phục vụ cho mục đích tham khảo, tra cứu, được kiểm soát chuyên
+                môn bởi đội ngũ chuyên gia, bác sĩ của VNVC và là tài sản thuộc sở hữu của VNVC.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart Popup -->
+    <div id="cart-popup" class="cart-popup">
+        <div class="cart-popup-content">
+            <div class="cart-header">
+                <h3>Giỏ hàng vắc xin</h3>
+                <span class="close-cart" onclick="toggleCart()">&times;</span>
+            </div>
+            <div id="cart-items" class="cart-items">
+                <!-- Cart items will be displayed here -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Tổng cộng:</span>
+                    <span id="cart-total-amount">0 đ</span>
+                </div>
+                <button class="checkout-btn" onclick="checkout()">Đặt lịch tiêm</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="<?php echo $base_url; ?>js/main.js"></script>
+    <script src="<?php echo $base_url; ?>js/giohang.js"></script>
+</body>
+
+</html>

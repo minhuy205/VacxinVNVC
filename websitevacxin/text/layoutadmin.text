@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="/website vacxin/css/admin.css">
+</head>
+
+<body>
+    <div class="admin-app">
+        <header class="admin-header">
+            <nav class="admin-nav">
+                <a href="/website vacxin/admin.html" class="admin-logo">
+                    <img src="/website vacxin/img/logo.webp" alt="Admin Logo">
+                </a>
+                <ul class="admin-menu">
+                    <li><a href="/website vacxin/admin/dashboard.html">Dashboard</a></li>
+                    <li><a href="/website vacxin/admin/users.html">Quản lý người dùng</a></li>
+                    <li><a href="/website vacxin/admin/vaccines.html">Quản lý Vắc xin</a></li>
+                    <li><a href="/website vacxin/admin/orders.html">Quản lý đơn hàng</a></li>
+                    <li><a href="/website vacxin/admin/reports.html">Báo cáo</a></li>
+                    <li><a href="/website vacxin/admin/settings.html">Cài đặt</a></li>
+                    <li><a href="/website vacxin/index.html">Đăng xuất</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <div class="admin-container">
+            <aside class="admin-sidebar">
+                <ul>
+                    <li><a href="#">Tổng quan</a></li>
+                    <li><a href="#">Người dùng</a></li>
+                    <li><a href="#">Vắc xin</a></li>
+                    <li><a href="#">Đơn hàng</a></li>
+                    <li><a href="#">Báo cáo</a></li>
+                </ul>
+            </aside>
+            <main class="admin-content">
+                <h1>Chào mừng đến với trang quản trị</h1>
+                <p>Chọn một danh mục để quản lý</p>
+            </main>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+<?php
+// Kết nối database
+require_once 'db_connect.php';
+
+// Lấy danh mục từ tham số URL
+$category = isset($_GET['category']) ? sanitize($conn, $_GET['category']) : '';
+
+// Truy vấn dữ liệu
+if (!empty($category)) {
+    $sql = "SELECT * FROM vaccines WHERE category = '$category'";
+} else {
+    $sql = "SELECT * FROM vaccines";
+}
+
+$result = $conn->query($sql);
+$vaccines = [];
+
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $vaccines[] = $row;
+    }
+}
+
+// Trả về dữ liệu dạng JSON
+header('Content-Type: application/json');
+echo json_encode($vaccines);
+
+$conn->close();
+?>

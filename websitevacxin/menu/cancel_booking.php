@@ -1,0 +1,47 @@
+<?php
+session_start();
+$base_url = '/websitevacxin/';
+
+// Kiểm tra đăng nhập
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Kiểm tra ID đơn đặt lịch
+if (!isset($_GET['id'])) {
+    header("Location: profile.php");
+    exit;
+}
+
+$booking_id = (int)$_GET['id'];
+$user_id = $_SESSION['user_id'];
+
+// Kết nối database
+require_once 'db_connect.php';
+
+// Kiểm tra xem đơn đặt lịch có thuộc về người dùng hiện tại không
+$check_sql = "SELECT id, status FROM bookings WHERE id = $booking_id AND user_id = $user_id";
+$check_result = $conn->query($check_sql);
+
+if ($check_result->num_rows == 0) {
+    header("Location: profile.php");
+    exit;
+}
+
+$booking = $check_result->fetch_assoc();
+
+// Kiểm tra trạng thái đơn đặt lịch
+if ($booking['status'] != 'pending') {
+    header("Location: profile.php?error=cannot_cancel");
+    exit;
+}
+
+// Cập nhật trạng thái đơn đặt lịch thành "đã hủy"
+$update_sql = "UPDATE bookings SET status = 'cancelled' WHERE id = $booking_id";
+$conn->query($update_sql);
+
+// Chuyển hướng về trang hồ sơ
+header("Location: profile.php?success=cancelled");
+exit;
+?>

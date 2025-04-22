@@ -1,0 +1,382 @@
+<?php
+session_start();
+$base_url = '/websitevacxin/';
+
+// Kết nối database
+require_once 'db_connect.php';
+
+$message = '';
+$messageType = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Lấy dữ liệu từ form
+    $username = sanitize($conn, $_POST['username']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+    $email = sanitize($conn, $_POST['email']);
+    $full_name = sanitize($conn, $_POST['full_name']);
+    $role = sanitize($conn, $_POST['role']); // Thêm vai trò
+    
+    // Kiểm tra mật khẩu xác nhận
+    if ($password !== $confirm_password) {
+        $message = 'Mật khẩu xác nhận không khớp!';
+        $messageType = 'error';
+    } else {
+        // Kiểm tra username đã tồn tại chưa
+        $check_sql = "SELECT id FROM users WHERE username = '$username'";
+        $check_result = $conn->query($check_sql);
+        
+        if ($check_result->num_rows > 0) {
+            $message = 'Tên đăng nhập đã tồn tại!';
+            $messageType = 'error';
+        } else {
+            // Kiểm tra email đã tồn tại chưa
+            $check_email_sql = "SELECT id FROM users WHERE email = '$email'";
+            $check_email_result = $conn->query($check_email_sql);
+            
+            if ($check_email_result->num_rows > 0) {
+                $message = 'Email đã được sử dụng!';
+                $messageType = 'error';
+            } else {
+                // Mã hóa mật khẩu
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                
+                // Kiểm tra xem cột role đã tồn tại trong bảng users chưa
+                $check_column = "SHOW COLUMNS FROM users LIKE 'role'";
+                $column_exists = $conn->query($check_column);
+                
+                if ($column_exists->num_rows == 0) {
+                    // Thêm cột role vào bảng users nếu chưa tồn tại
+                    $add_column = "ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'user'";
+                    $conn->query($add_column);
+                }
+                
+                // Thêm người dùng mới với vai trò
+                $current_time = date('Y-m-d H:i:s');
+                $sql = "INSERT INTO users (username, password, email, full_name, role, created_at) 
+                        VALUES ('$username', '$hashed_password', '$email', '$full_name', '$role', '$current_time')";
+                
+                if ($conn->query($sql)) {
+                    $message = 'Đăng ký thành công! Bạn có thể <a href="login.php">đăng nhập</a> ngay bây giờ.';
+                    $messageType = 'success';
+                } else {
+                    $message = 'Lỗi: ' . $conn->error;
+                    $messageType = 'error';
+                }
+            }
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký - VNVC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a28ba;
+            --secondary-color: #f3f6ff;
+            --accent-color: #ff4757;
+            --text-color: #333;
+            --light-text: #666;
+            --white: #fff;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+            padding: 0;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+        }
+
+        .message.error {
+            background-color: #ffe0e3;
+            color: #d63031;
+            border-left: 4px solid #d63031;
+        }
+
+        .message.success {
+            background-color: #e3ffe2;
+            color: #27ae60;
+            border-left: 4px solid #27ae60;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--light-text);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(26, 40, 186, 0.2);
+            outline: none;
+        }
+
+        .form-group .icon {
+            position: absolute;
+            right: 15px;
+            top: 38px;
+            color: var(--light-text);
+        }
+
+        .role-selection {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .role-option {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .role-option:hover {
+            border-color: var(--primary-color);
+        }
+
+        .role-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(26, 40, 186, 0.05);
+        }
+
+        .role-option i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .role-option h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .role-option p {
+            font-size: 12px;
+            color: var(--light-text);
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            background-color: #141e8e;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .role-selection {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Đăng Ký Tài Khoản</h1>
+            <p>Tạo tài khoản để sử dụng dịch vụ của VNVC</p>
+        </div>
+        
+        <div class="form-container">
+            <?php if (!empty($message)): ?>
+                <div class="message <?php echo $messageType; ?>">
+                    <?php echo $message; ?>
+                </div>
+            <?php endif; ?>
+            
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="full_name">Họ và tên</label>
+                    <input type="text" id="full_name" name="full_name" placeholder="Nhập họ và tên của bạn" required>
+                    <i class="icon fas fa-user"></i>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Nhập địa chỉ email của bạn" required>
+                    <i class="icon fas fa-envelope"></i>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập</label>
+                    <input type="text" id="username" name="username" placeholder="Chọn tên đăng nhập" required>
+                    <i class="icon fas fa-user-circle"></i>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" name="password" placeholder="Tạo mật khẩu" required>
+                    <i class="icon fas fa-lock"></i>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">Xác nhận mật khẩu</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Nhập lại mật khẩu" required>
+                    <i class="icon fas fa-lock"></i>
+                </div>
+                
+                <div class="form-group">
+                    <label>Chọn vai trò của bạn</label>
+                    <div class="role-selection">
+                        <div class="role-option" onclick="selectRole('user')">
+                            <i class="fas fa-user"></i>
+                            <h3>Người dùng</h3>
+                            <p>Đăng ký tiêm vắc xin</p>
+                        </div>
+                        <div class="role-option" onclick="selectRole('admin')">
+                            <i class="fas fa-user-shield"></i>
+                            <h3>Quản trị viên</h3>
+                            <p>Quản lý hệ thống</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="role" name="role" value="user" required>
+                </div>
+                
+                <button type="submit" class="btn">Đăng Ký</button>
+            </form>
+        </div>
+        
+        <div class="footer">
+            Đã có tài khoản? <a href="login.php">Đăng nhập ngay</a>
+            <br><br>
+            <a href="../index.php">Quay lại trang chủ</a>
+        </div>
+    </div>
+    
+    <script>
+        function selectRole(role) {
+            // Cập nhật giá trị input hidden
+            document.getElementById('role').value = role;
+            
+            // Cập nhật giao diện
+            const roleOptions = document.querySelectorAll('.role-option');
+            roleOptions.forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Thêm class selected cho option được chọn
+            if (role === 'user') {
+                roleOptions[0].classList.add('selected');
+            } else {
+                roleOptions[1].classList.add('selected');
+            }
+        }
+        
+        // Mặc định chọn vai trò người dùng
+        document.addEventListener('DOMContentLoaded', function() {
+            selectRole('user');
+        });
+    </script>
+</body>
+</html>
